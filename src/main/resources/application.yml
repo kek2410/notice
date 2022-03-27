@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: notice
+  devtools:
+    livereload:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+    database: h2
+    generate-ddl: off
+    show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;
+    username: SA
+    password:
+server:
+  port: 8080
+  servlet:
+    context-path: /carrier
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+---
+spring:
+  config:
+    activate:
+      on-profile: staging
+---
+spring:
+  config:
+    activate:
+      on-profile: production
+
+

@@ -9,43 +9,47 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class NoticeService {
 
   private final NoticeRepository noticeRepository;
+  private final FileService fileService;
 
-  @Transactional
-  public Long create(NoticeCreateAndUpdate noticeCreate) {
+  public NoticeDto create(NoticeCreateAndUpdate noticeCreate, MultipartFile[] multipartFiles) {
     var notice = noticeCreate.convertNotice();
+    notice.addAllFile(fileService.stores(multipartFiles));
     noticeRepository.saveAndFlush(notice);
-    return notice.getId();
+    return notice.convertDto();
   }
 
-  @Transactional
   public NoticeDto update(Long id, NoticeCreateAndUpdate request) {
     var notice = noticeRepository.findById(id)
         .orElseThrow(NotFoundException::new);
     notice.update(request);
+    noticeRepository.flush();
     return notice.convertDto();
   }
 
-  @Transactional
   public void delete(Long id) {
     var notice = noticeRepository.findById(id)
         .orElseThrow(NotFoundException::new);
     noticeRepository.delete(notice);
+    noticeRepository.flush();
   }
 
-  @Transactional(readOnly = true)
   public Optional<NoticeDto> notice(Long id) {
     var optionalNotice = noticeRepository.findById(id);
     if (optionalNotice.isEmpty()) {
       return Optional.empty();
     }
-    return Optional.of(optionalNotice.get().convertDto());
+    var notice = optionalNotice.get();
+    notice.increaseCount();
+    return Optional.of(notice.convertDto());
   }
 
 }
